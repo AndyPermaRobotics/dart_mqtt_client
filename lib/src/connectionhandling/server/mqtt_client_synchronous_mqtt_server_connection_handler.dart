@@ -89,7 +89,7 @@ class SynchronousMqttServerConnectionHandler extends MqttServerConnectionHandler
           MqttLogger.log('SynchronousMqttServerConnectionHandler::internalConnect - '
               'Uncaught Exception in internalConnect(): $error, autoReconnectInProgress: $autoReconnectInProgress');
 
-          throw error;
+          //throw error;
         });
       } on Exception catch (e) {
         //print('ANDY: Exception in internalConnect(): $e, autoReconnectInProgress: $autoReconnectInProgress');
