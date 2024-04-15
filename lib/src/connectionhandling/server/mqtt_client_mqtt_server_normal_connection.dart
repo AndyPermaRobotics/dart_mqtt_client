@@ -34,7 +34,13 @@ class MqttServerNormalConnection extends MqttServerConnection<Socket> {
     MqttLogger.log('MqttNormalConnection::connect - entered');
     try {
       // Connect and save the socket.
+
+      print("ANDY: Before Socket.connect");
+
       final socket = await Socket.connect(server, port);
+
+      print("Andy: After Socket.connect: ${socket.address}");
+
       // Socket options
       final applied = _applySocketOptions(socket, socketOptions);
       if (applied) {
