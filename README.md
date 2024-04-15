@@ -1,5 +1,5 @@
 
-# How we modified this package
+# How we modified the orginal mqtt_client package
 
 The original package had a problem with uncaught SocketExceptions. 
 We could not catch them in code with try and catch blocks, therefore we added a runZonedGuarded function to catch them in the `SynchronousMqttServerConnectionHandler` class.
