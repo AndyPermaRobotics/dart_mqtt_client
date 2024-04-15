@@ -62,6 +62,7 @@ class SynchronousMqttServerConnectionHandler extends MqttServerConnectionHandler
 
       // Connect
       try {
+        //We run this in a zone, to catch uncaught SocketExceptions
         await runZonedGuarded(() async {
           if (!autoReconnectInProgress) {
             MqttLogger.log('SynchronousMqttServerConnectionHandler::internalConnect - calling connect');
@@ -85,18 +86,21 @@ class SynchronousMqttServerConnectionHandler extends MqttServerConnectionHandler
           MqttLogger.log('SynchronousMqttServerConnectionHandler::internalConnect - '
               'post sleep, state = $connectionStatus');
         }, (error, stack) {
-          print('ANDY: Uncaught Error in internalConnect(): $error, autoReconnectInProgress: $autoReconnectInProgress');
-          print('ANDY: Stack Trace: $stack');
+          MqttLogger.log('SynchronousMqttServerConnectionHandler::internalConnect - '
+              'Uncaught Exception in internalConnect(): $error, autoReconnectInProgress: $autoReconnectInProgress');
+
+          throw error;
         });
       } on Exception catch (e) {
-        print('ANDY: Exception in internalConnect(): $e, autoReconnectInProgress: $autoReconnectInProgress');
+        //print('ANDY: Exception in internalConnect(): $e, autoReconnectInProgress: $autoReconnectInProgress');
 
         // Ignore exceptions in an auto reconnect sequence
         if (autoReconnectInProgress) {
           MqttLogger.log('SynchronousMqttServerConnectionHandler::internalConnect'
               ' exception thrown during auto reconnect - ignoring');
         } else {
-          print("ANDY: Rethrowing Exception $e");
+          MqttLogger.log('SynchronousMqttServerConnectionHandler::internalConnect'
+              ' exception thrown during connect (autoReconnectInProgress=$autoReconnectInProgress) - rethrowing');
 
           rethrow;
         }
