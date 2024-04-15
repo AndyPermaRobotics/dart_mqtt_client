@@ -74,7 +74,11 @@ class MqttServerNormalConnection extends MqttServerConnection<Socket> {
       print("ANDY: Before Socket.connect");
 
       // Connect and save the socket.
-      final socket = await Socket.connect(server, port);
+      final socket = await Socket.connect(
+        server,
+        port,
+        timeout: Duration(seconds: 10),
+      );
 
       print("Andy: After Socket.connect: ${socket.address}");
 
