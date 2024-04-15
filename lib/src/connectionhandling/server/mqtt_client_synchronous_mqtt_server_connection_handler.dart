@@ -65,54 +65,54 @@ class SynchronousMqttServerConnectionHandler extends MqttServerConnectionHandler
       // Connect
       try {
         //We run this in a zone, to catch uncaught SocketExceptions
-        await runZonedGuarded(() async {
-          if (!autoReconnectInProgress) {
-            MqttLogger.log('SynchronousMqttServerConnectionHandler::internalConnect - calling connect');
-            await connection.connect(hostname, port);
-          } else {
-            MqttLogger.log('SynchronousMqttServerConnectionHandler::internalConnect - calling connectAuto');
-            await connection.connectAuto(hostname, port);
-          }
+        //await runZonedGuarded(() async {
+        if (!autoReconnectInProgress) {
+          MqttLogger.log('SynchronousMqttServerConnectionHandler::internalConnect - calling connect');
+          await connection.connect(hostname, port);
+        } else {
+          MqttLogger.log('SynchronousMqttServerConnectionHandler::internalConnect - calling connectAuto');
+          await connection.connectAuto(hostname, port);
+        }
 
-          MqttLogger.log('SynchronousMqttServerConnectionHandler::internalConnect - '
-              'connection complete');
-          // Transmit the required connection message to the broker.
-          MqttLogger.log('SynchronousMqttServerConnectionHandler::internalConnect '
-              'sending connect message');
-          sendMessage(connectMessage);
-          MqttLogger.log('SynchronousMqttServerConnectionHandler::internalConnect - '
-              'pre sleep, state = $connectionStatus');
-          // We're the sync connection handler so we need to wait for the
-          // brokers acknowledgement of the connections
-          await connectTimer.sleep();
-          MqttLogger.log('SynchronousMqttServerConnectionHandler::internalConnect - '
-              'post sleep, state = $connectionStatus');
-        }, (error, stack) {
-          print("ANDY: Uncaught Error: $error, $stack");
+        MqttLogger.log('SynchronousMqttServerConnectionHandler::internalConnect - '
+            'connection complete');
+        // Transmit the required connection message to the broker.
+        MqttLogger.log('SynchronousMqttServerConnectionHandler::internalConnect '
+            'sending connect message');
+        sendMessage(connectMessage);
+        MqttLogger.log('SynchronousMqttServerConnectionHandler::internalConnect - '
+            'pre sleep, state = $connectionStatus');
+        // We're the sync connection handler so we need to wait for the
+        // brokers acknowledgement of the connections
+        await connectTimer.sleep();
+        MqttLogger.log('SynchronousMqttServerConnectionHandler::internalConnect - '
+            'post sleep, state = $connectionStatus');
+        // }, (error, stack) {
+        //   print("ANDY: Uncaught Error: $error, $stack");
 
-          MqttLogger.log('SynchronousMqttServerConnectionHandler::internalConnect - '
-              'Uncaught Exception in internalConnect(): $error, autoReconnectInProgress: $autoReconnectInProgress');
+        //   MqttLogger.log('SynchronousMqttServerConnectionHandler::internalConnect - '
+        //       'Uncaught Exception in internalConnect(): $error, autoReconnectInProgress: $autoReconnectInProgress');
 
-          // Note: if we throw an error here, it won't be caught by the outer try/catch block
-        });
-
-        print("ANDY: End of loop");
+        //   // Note: if we throw an error here, it won't be caught by the outer try/catch block
+        // });
       } on Exception catch (e) {
         //obsolate because of the runZonedGuarded
 
-        //print('ANDY: Exception in internalConnect(): $e, autoReconnectInProgress: $autoReconnectInProgress');
+        print('ANDY: Exception in internalConnect(): $e, autoReconnectInProgress: $autoReconnectInProgress');
 
-        // Ignore exceptions in an auto reconnect sequence
-        // if (autoReconnectInProgress) {
-        //   MqttLogger.log('SynchronousMqttServerConnectionHandler::internalConnect'
-        //       ' exception thrown during auto reconnect - ignoring $e');
-        // } else {
-        //   MqttLogger.log('SynchronousMqttServerConnectionHandler::internalConnect'
-        //       ' exception thrown during connect (autoReconnectInProgress=$autoReconnectInProgress) - rethrowing $e');
+        //Ignore exceptions in an auto reconnect sequence
+        if (autoReconnectInProgress) {
+          MqttLogger.log('SynchronousMqttServerConnectionHandler::internalConnect'
+              ' exception thrown during auto reconnect - ignoring $e');
+        } else {
+          MqttLogger.log('SynchronousMqttServerConnectionHandler::internalConnect'
+              ' exception thrown during connect (autoReconnectInProgress=$autoReconnectInProgress) - rethrowing $e');
 
-        //   rethrow;
-        // }
+          rethrow;
+        }
       }
+
+      print("ANDY: End of loop");
     } while (connectionStatus.state != MqttConnectionState.connected && ++connectionAttempts < maxConnectionAttempts!);
     // If we've failed to handshake with the broker, throw an exception.
     if (connectionStatus.state != MqttConnectionState.connected) {
