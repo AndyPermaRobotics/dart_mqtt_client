@@ -71,8 +71,12 @@ class MqttServerNormalConnection extends MqttServerConnection<Socket> {
   ) async {
     MqttLogger.log('MqttNormalConnection::connectAuto - entered');
     try {
+      print("ANDY: Before Socket.connect");
+
       // Connect and save the socket.
       final socket = await Socket.connect(server, port);
+
+      print("Andy: After Socket.connect: ${socket.address}");
 
       // Socket options
       final applied = _applySocketOptions(socket, socketOptions);
@@ -84,6 +88,8 @@ class MqttServerNormalConnection extends MqttServerConnection<Socket> {
 
       return null;
     } on SocketException catch (e) {
+      print("ANDY: SocketException in connectAuto: $e");
+
       final message = 'MqttNormalConnection::connectAuto - The connection to the message broker '
           '{$server}:{$port} could not be made. Error is ${e.toString()}';
       throw NoConnectionException(message);
