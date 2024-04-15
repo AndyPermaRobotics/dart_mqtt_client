@@ -1,3 +1,18 @@
+
+# How we modified this package
+
+The original package had a problem with uncaught SocketExceptions. 
+We could not catch them in code with try and catch blocks, therefore we added a runZonedGuarded function to catch them in the `SynchronousMqttServerConnectionHandler` class.
+
+```dart
+await runZonedGuarded(() async {
+  
+}, (error, stackTrace) {
+  
+});
+```
+
+
 # mqtt_client
 [![Build Status](https://github.com/shamblett/mqtt_client/actions/workflows/ci.yml/badge.svg)](https://github.com/shamblett/mqtt_client/actions/workflows/ci.yml)
 [![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fshamblett%2Fmqtt_client.svg?type=shield)](https://app.fossa.io/projects/git%2Bgithub.com%2Fshamblett%2Fmqtt_client?ref=badge_shield)
