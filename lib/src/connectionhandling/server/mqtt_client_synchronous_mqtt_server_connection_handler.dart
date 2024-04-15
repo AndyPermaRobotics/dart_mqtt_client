@@ -62,39 +62,53 @@ class SynchronousMqttServerConnectionHandler extends MqttServerConnectionHandler
         connection.onDisconnected = onDisconnected;
       }
 
+      Completer<void> completer = Completer<void>();
+
       // Connect
       try {
         //We run this in a zone, to catch uncaught SocketExceptions
-        //await runZonedGuarded(() async {
-        if (!autoReconnectInProgress) {
-          MqttLogger.log('SynchronousMqttServerConnectionHandler::internalConnect - calling connect');
-          await connection.connect(hostname, port);
-        } else {
-          MqttLogger.log('SynchronousMqttServerConnectionHandler::internalConnect - calling connectAuto');
-          await connection.connectAuto(hostname, port);
-        }
+        unawaited(runZonedGuarded(() async {
+          if (!autoReconnectInProgress) {
+            MqttLogger.log('SynchronousMqttServerConnectionHandler::internalConnect - calling connect');
+            await connection.connect(hostname, port);
+          } else {
+            MqttLogger.log('SynchronousMqttServerConnectionHandler::internalConnect - calling connectAuto');
+            await connection.connectAuto(hostname, port);
+          }
 
-        MqttLogger.log('SynchronousMqttServerConnectionHandler::internalConnect - '
-            'connection complete');
-        // Transmit the required connection message to the broker.
-        MqttLogger.log('SynchronousMqttServerConnectionHandler::internalConnect '
-            'sending connect message');
-        sendMessage(connectMessage);
-        MqttLogger.log('SynchronousMqttServerConnectionHandler::internalConnect - '
-            'pre sleep, state = $connectionStatus');
-        // We're the sync connection handler so we need to wait for the
-        // brokers acknowledgement of the connections
-        await connectTimer.sleep();
-        MqttLogger.log('SynchronousMqttServerConnectionHandler::internalConnect - '
-            'post sleep, state = $connectionStatus');
-        // }, (error, stack) {
-        //   print("ANDY: Uncaught Error: $error, $stack");
+          MqttLogger.log('SynchronousMqttServerConnectionHandler::internalConnect - '
+              'connection complete');
+          // Transmit the required connection message to the broker.
+          MqttLogger.log('SynchronousMqttServerConnectionHandler::internalConnect '
+              'sending connect message');
+          sendMessage(connectMessage);
+          MqttLogger.log('SynchronousMqttServerConnectionHandler::internalConnect - '
+              'pre sleep, state = $connectionStatus');
+          // We're the sync connection handler so we need to wait for the
+          // brokers acknowledgement of the connections
+          await connectTimer.sleep();
+          MqttLogger.log('SynchronousMqttServerConnectionHandler::internalConnect - '
+              'post sleep, state = $connectionStatus');
 
-        //   MqttLogger.log('SynchronousMqttServerConnectionHandler::internalConnect - '
-        //       'Uncaught Exception in internalConnect(): $error, autoReconnectInProgress: $autoReconnectInProgress');
+          completer.complete();
+        }, (error, stack) {
+          //   print("ANDY: Uncaught Error: $error, $stack");
 
-        //   // Note: if we throw an error here, it won't be caught by the outer try/catch block
-        // });
+          //   MqttLogger.log('SynchronousMqttServerConnectionHandler::internalConnect - '
+          //       'Uncaught Exception in internalConnect(): $error, autoReconnectInProgress: $autoReconnectInProgress');
+
+          //   // Note: if we throw an error here, it won't be caught by the outer try/catch block
+
+          print("ANDY Complete (error)");
+
+          if (completer.isCompleted) {
+            print("ANDY: Already completed -> skip complete");
+
+            return;
+          }
+
+          completer.complete();
+        }));
       } on Exception catch (e) {
         //obsolate because of the runZonedGuarded
 
@@ -111,6 +125,10 @@ class SynchronousMqttServerConnectionHandler extends MqttServerConnectionHandler
           rethrow;
         }
       }
+
+      print("ANDY - Waiting for completer");
+
+      await completer.future;
 
       print("ANDY: End of loop");
     } while (connectionStatus.state != MqttConnectionState.connected && ++connectionAttempts < maxConnectionAttempts!);
