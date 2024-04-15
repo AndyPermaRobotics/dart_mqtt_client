@@ -88,13 +88,15 @@ class SynchronousMqttServerConnectionHandler extends MqttServerConnectionHandler
           MqttLogger.log('SynchronousMqttServerConnectionHandler::internalConnect - '
               'post sleep, state = $connectionStatus');
         }, (error, stack) {
-          print("ANDY: Uncaught Error");
+          print("ANDY: Uncaught Error: $error, $stack");
 
           MqttLogger.log('SynchronousMqttServerConnectionHandler::internalConnect - '
               'Uncaught Exception in internalConnect(): $error, autoReconnectInProgress: $autoReconnectInProgress');
 
           // Note: if we throw an error here, it won't be caught by the outer try/catch block
         });
+
+        print("ANDY: End of loop");
       } on Exception catch (e) {
         //obsolate because of the runZonedGuarded
 
