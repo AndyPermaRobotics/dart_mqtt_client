@@ -101,6 +101,8 @@ class MqttServerNormalConnection extends MqttServerConnection<Socket> {
       final message = 'MqttNormalConnection::ConnectAuto - The connection to the message '
           'broker {$server}:{$port} could not be made: $e';
       throw NoConnectionException(message);
+    } catch (e) {
+      print("ANDY: dynamic exception in connectAuto: $e");
     }
   }
 
