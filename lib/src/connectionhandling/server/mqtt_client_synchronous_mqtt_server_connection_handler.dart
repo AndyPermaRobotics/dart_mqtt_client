@@ -97,10 +97,10 @@ class SynchronousMqttServerConnectionHandler extends MqttServerConnectionHandler
         // Ignore exceptions in an auto reconnect sequence
         if (autoReconnectInProgress) {
           MqttLogger.log('SynchronousMqttServerConnectionHandler::internalConnect'
-              ' exception thrown during auto reconnect - ignoring');
+              ' exception thrown during auto reconnect - ignoring $e');
         } else {
           MqttLogger.log('SynchronousMqttServerConnectionHandler::internalConnect'
-              ' exception thrown during connect (autoReconnectInProgress=$autoReconnectInProgress) - rethrowing');
+              ' exception thrown during connect (autoReconnectInProgress=$autoReconnectInProgress) - rethrowing $e');
 
           rethrow;
         }
